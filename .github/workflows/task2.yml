@@ -24,6 +24,6 @@ jobs:
         run: |
           docker run -d \
           --restart unless-stopped \
-          -p 8081:80 \
+          -p 8080:80 \
           --name ${{ env.NAME }} \
           ${{ env.NAME }}:1.0
