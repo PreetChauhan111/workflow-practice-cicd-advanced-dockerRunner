@@ -55,15 +55,14 @@ jobs:
         run: |
           rm -rf nginx
           mkdir -p nginx
-          cat > nginx/default.conf <<EOF
+          cat <<EOF > nginx/default.conf
           resolver 127.0.0.11 valid=10s;
 
           server {
             listen 80;
 
             location / {
-              set \$backend ${{ env.APP_NAME }}-${{ env.COLOR }};
-              proxy_pass http://\$backend:80;
+              proxy_pass http://${{ env.APP_NAME }}-${{ env.COLOR }}:80;
 
               proxy_set_header Host \$host;
               proxy_set_header X-Real-IP \$remote_addr;
@@ -72,11 +71,11 @@ jobs:
             }
           }
           EOF
-
       - name: Start or reload nginx
         shell: bash
         run: |
-          if docker ps --format '{{.Names}}' | grep -q "${{ env.NGINX }}"; then
+          if docker ps -a --format '{{.Names}}' | grep -q "${{ env.NGINX }}"; then
+            docker exec ${{ env.NGINX }} nginx -t
             docker exec ${{ env.NGINX }} nginx -s reload
           else
             docker run -d \
@@ -87,7 +86,7 @@ jobs:
               --name ${{ env.NGINX }} \
               nginx:alpine
           fi
-          
+
       - name: Remove old application container
         shell: bash
         run: |
