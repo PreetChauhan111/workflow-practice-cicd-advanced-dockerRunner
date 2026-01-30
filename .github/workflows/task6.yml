@@ -11,19 +11,25 @@ env:
   APP_NAME: task6
   IMAGE: task6-website
   NETWORK: task6-net
-  NGINX: task6-nginx
 
 jobs:
   deploy:
     runs-on: [self-hosted, docker]
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - run: docker network inspect ${{ env.NETWORK }} || docker network create ${{ env.NETWORK }}
+      - name: Ensure Docker network exists
+        shell: bash
+        run: |
+          docker network inspect ${{ env.NETWORK }} >/dev/null 2>&1 \
+          || docker network create ${{ env.NETWORK }}
 
-      - run: |
-          if docker ps --format '{{.Names}}' | grep -q task6-blue; then
+      - name: Decide active deployment color
+        shell: bash
+        run: |
+          if docker ps --format '{{.Names}}' | grep -q "${{ env.APP_NAME }}-blue"; then
             echo "COLOR=green" >> $GITHUB_ENV
             echo "OLD_COLOR=blue" >> $GITHUB_ENV
           else
@@ -31,37 +37,27 @@ jobs:
             echo "OLD_COLOR=green" >> $GITHUB_ENV
           fi
 
-      - run: docker build -t task6-website task6
+      - name: Build application Docker image
+        shell: bash
+        run: |
+          docker build -t ${{ env.IMAGE }}:latest task6
 
-      - run: |
-          docker rm -f task6-${{ env.COLOR }} || true
-          docker run -d --network task6-net --name task6-${{ env.COLOR }} task6-website
+      - name: Stop container of same color if exists
+        shell: bash
+        run: |
+          docker rm -f ${{ env.APP_NAME }}-${{ env.COLOR }} || true
 
-      - run: |
-          mkdir -p nginx
-          cat > nginx/nginx.conf <<EOF
-          user nginx;
-          events {}
-
-          http {
-            server {
-              listen 80;
-              location / {
-                proxy_pass http://task6-${{ env.COLOR }}:80;
-              }
-            }
-          }
-          EOF
-
-      - run: |
-          docker rm -f task6-nginx || true
+      - name: Start new application container
+        shell: bash
+        run: |
           docker run -d \
-            --network task6-net \
+            --restart unless-stopped \
+            --network ${{ env.NETWORK }} \
             -p 8080:80 \
-            -v $PWD/nginx/nginx.conf:/tmp/nginx.conf:ro \
-            --entrypoint nginx \
-            --name task6-nginx \
-            nginx:alpine \
-            -c /tmp/nginx.conf -g 'daemon off;'
+            --name ${{ env.APP_NAME }}-${{ env.COLOR }} \
+            ${{ env.IMAGE }}:latest
 
-      - run: docker rm -f task6-${{ env.OLD_COLOR }} || true
+      - name: Remove old application container
+        shell: bash
+        run: |
+          docker rm -f ${{ env.APP_NAME }}-${{ env.OLD_COLOR }} || true
