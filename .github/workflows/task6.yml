@@ -61,11 +61,12 @@ jobs:
       - name: Start nginx reverse proxy
         shell: bash
         run: |
+          mkdir -p nginx
           docker rm -f ${{ env.NGINX }} || true
           docker run -d \
             --network ${{ env.NETWORK }} \
             -p 8080:80 \
-            -v $PWD/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro \
+            -v $PWD/nginx:/etc/nginx/conf.d:ro \
             --name ${{ env.NGINX }} \
             nginx:alpine
 
