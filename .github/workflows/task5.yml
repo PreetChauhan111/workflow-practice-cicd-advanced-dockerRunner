@@ -54,6 +54,7 @@ jobs:
       - name: Container Health Check
         run: |
           echo "HEALTHY=false" >> $GITHUB_ENV
+          echo "Checking port: $PORT"
           for i in {1..10}
           do
             if curl -sf http://localhost:$PORT 
