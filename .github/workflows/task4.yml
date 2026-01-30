@@ -26,6 +26,7 @@ jobs:
           else
             ${{ env.COLOR }} == 'blue'
             echo "Rerouted traffic to task4-${{ env.COLOR }}"
+          fi
       - name: Build image
         run: docker build -t ${{ env.NAME }}-${{ env.COLOR }}:1.0 task4
       - name: Run new container Blue
