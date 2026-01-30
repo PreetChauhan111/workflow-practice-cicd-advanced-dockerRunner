@@ -84,9 +84,10 @@ jobs:
             --restart unless-stopped \
             --network ${{ env.NETWORK }} \
             -p 8080:80 \
-            -v $PWD/nginx/nginx.conf:/etc/nginx/nginx.conf:ro \
+            -v $PWD/nginx/nginx.conf:/tmp/nginx.conf:ro \
             --name ${{ env.NGINX }} \
-            nginx:alpine
+            nginx:alpine \
+            nginx -c /tmp/nginx.conf -g 'daemon off;'
 
       - name: Remove old application container
         shell: bash
