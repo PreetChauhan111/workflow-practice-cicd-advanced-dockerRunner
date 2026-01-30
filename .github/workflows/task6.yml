@@ -32,8 +32,10 @@ jobs:
       - name: Build Image
         run: |
          docker build -t ${{ env.NAME }}-website:latest task6
-         echo "server ${{ env.NAME }}-${{ env.COLOR }}" > nginx.conf
     
+  deploy:
+    runs-on: [self-hosted, docker]
+    steps:
       - name: Run Blue Container
         if: ${{ env.COLOR == 'blue' }}
         run: |
@@ -69,12 +71,12 @@ jobs:
       - name: Start Nginx
         shell: bash
         run: |
-          if ! docker ps --format '{.Names}' | grep -qx "${NAME}-nginx"
+          if ! docker ps --format '{{.Names}}' | grep -qx "${NAME}-nginx"
           then
             docker run -d \
             --restart unless-stopped \
             -p 8080:80 \
-            -v $PWD/task6/nginx.conf:/etc/nginx/conf.d/default.conf \
+            -v $PWD/nginx.conf:/etc/nginx/conf.d/default.conf \
             --name ${NAME}-nginx \
             nginx:alpine
           fi
