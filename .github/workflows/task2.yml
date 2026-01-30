@@ -19,7 +19,7 @@ jobs:
       - name: remove old container
         run: docker rm -f ${{ env.NAME }} || true
       - name: build image
-        run: docker build -t ${{ env.NAME }}:1.0 task1
+        run: docker build -t ${{ env.NAME }}:1.0 task2
       - name: Run new container
         run: |
           docker run -d \
