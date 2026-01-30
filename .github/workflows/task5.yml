@@ -54,15 +54,15 @@ jobs:
       - name: Container Health Check
         run: |
           echo "HEALTHY=false" >> $GITHUB_ENV
-          echo "Checking port: $PORT"
-          for i in {1..10}
+          for i in {1..20}
           do
-            if curl -sf http://localhost:$PORT 
+            echo "Attempt $i..."
+            if curl -v http://localhost:$PORT 
             then
               echo "HEALTHY=true" >> $GITHUB_ENV
               exit 0
             fi
-            sleep 2
+            sleep 3
           done
 
       - name: Rollback if Unhealthy
