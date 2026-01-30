@@ -34,6 +34,7 @@ jobs:
          docker build -t ${{ env.NAME }}-website:latest task6
     
   deploy:
+    needs: build
     runs-on: [self-hosted, docker]
     steps:
       - name: Run Blue Container
