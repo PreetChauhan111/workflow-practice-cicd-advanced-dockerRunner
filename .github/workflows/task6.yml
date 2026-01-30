@@ -52,7 +52,7 @@ jobs:
           docker rm -f task6-active || true
           docker rename task6-${{ env.COLOR }} task6-active
 
-      - name: Start nginx reverse proxy (FINAL – serves app)
+      - name: Start nginx reverse proxy
         shell: bash
         run: |
           docker rm -f task6-nginx || true
