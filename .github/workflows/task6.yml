@@ -52,27 +52,19 @@ jobs:
           docker rm -f task6-active || true
           docker rename task6-${{ env.COLOR }} task6-active
 
-      - name: Start nginx reverse proxy (SAFE MODE)
+      - name: Start nginx reverse proxy (FINAL)
+        shell: bash
         run: |
           docker rm -f task6-nginx || true
+
           docker run -d \
-            --network ${{ env.NETWORK }} \
+            --network task6-net \
             -p 8080:80 \
             --name task6-nginx \
+            --entrypoint nginx \
             nginx:alpine \
-            sh -c 'cat <<EOF >/tmp/nginx.conf
-            server {
-              listen 80;
-              location / {
-                proxy_pass http://task6-active:80;
-                proxy_set_header Host \$host;
-                proxy_set_header X-Real-IP \$remote_addr;
-                proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-                proxy_set_header X-Forwarded-Proto \$scheme;
-              }
-            }
-            EOF
-            nginx -c /tmp/nginx.conf -g "daemon off;"'
+            -g 'daemon off;' \
+            -c /etc/nginx/nginx.conf
 
       - name: Remove old application container
         run: |
