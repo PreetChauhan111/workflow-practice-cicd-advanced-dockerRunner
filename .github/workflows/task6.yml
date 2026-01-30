@@ -59,10 +59,9 @@ jobs:
           events {}
 
           http {
-            resolver 127.0.0.11 valid=10s;
-
             server {
               listen 80;
+              resolver 127.0.0.11 valid=10s;
 
               location / {
                 proxy_pass http://${{ env.APP_NAME }}-${{ env.COLOR }}:80;
