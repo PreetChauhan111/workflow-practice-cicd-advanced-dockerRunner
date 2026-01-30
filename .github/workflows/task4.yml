@@ -21,10 +21,10 @@ jobs:
         run: |
           if docker ps --format '{{.Names}}' | grep task4-blue
           then
-            ${{ env.COLOR }} == 'green'
+            ${{ env.COLOR }} == ${{ !env.COLOR }}
             echo "Rerouted traffic to task4-${{ env.COLOR }}"
           else
-            ${{ env.COLOR }} == 'blue'
+            ${{ env.COLOR }} == ${{ !env.COLOR }}
             echo "Rerouted traffic to task4-${{ env.COLOR }}"
           fi
       - name: Build image
