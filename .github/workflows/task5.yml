@@ -58,10 +58,10 @@ jobs:
             sleep 2
           done
       - name: Rollback if Unhealthy
-        if: env.HEALTHY == 'false'
+        if: ${{ env.HEALTHY == 'false' }}
         run: |
           docker rm -f ${{ env.NAME }}-${{ env.COLOR }} || true
       - name: Remove Old Container
-        if: env.HEALTHY == 'true'
+        if: ${{ env.HEALTHY == 'true' }}
         run: |
           docker rm -f ${{ env.NAME }}-${{ env.OLD_COLOR }} || true
