@@ -21,14 +21,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 1️⃣ Ensure Docker network exists
       - name: Ensure Docker network
         shell: bash
         run: |
           docker network inspect ${{ env.NETWORK }} >/dev/null 2>&1 \
           || docker network create ${{ env.NETWORK }}
 
-      # 2️⃣ Decide blue / green
       - name: Decide active color
         shell: bash
         run: |
@@ -40,11 +38,9 @@ jobs:
             echo "OLD_COLOR=green" >> $GITHUB_ENV
           fi
 
-      # 3️⃣ Build application image
       - name: Build application image
         run: docker build -t ${{ env.IMAGE }}:latest task6
 
-      # 4️⃣ Start NEW application container (no public ports)
       - name: Start new application container
         shell: bash
         run: |
@@ -62,14 +58,13 @@ jobs:
           cat > nginx/default.conf <<EOF
           resolver 127.0.0.11 valid=10s;
 
-          upstream app {
-            server ${{ env.APP_NAME }}-${{ env.COLOR }}:80;
-          }
-
           server {
             listen 80;
+
             location / {
-              proxy_pass http://app;
+              set \$backend ${{ env.APP_NAME }}-${{ env.COLOR }};
+              proxy_pass http://\$backend:80;
+
               proxy_set_header Host \$host;
               proxy_set_header X-Real-IP \$remote_addr;
               proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
@@ -78,8 +73,6 @@ jobs:
           }
           EOF
 
-
-      # 6️⃣ Start nginx OR reload config
       - name: Start or reload nginx
         shell: bash
         run: |
@@ -94,8 +87,7 @@ jobs:
               --name ${{ env.NGINX }} \
               nginx:alpine
           fi
-
-      # 7️⃣ Remove OLD container (after traffic switch)
+          
       - name: Remove old application container
         shell: bash
         run: |
