@@ -72,17 +72,18 @@ jobs:
           }
           EOF
 
+
       - name: Start nginx
         shell: bash
         run: |
           docker rm -f ${{ env.NGINX }} || true
           docker run -d \
-            --restart unless-stopped \
-            --network ${{ env.NETWORK }} \
-            -p 8080:80 \
-            -v $PWD/nginx:/etc/nginx/conf.d:ro \
-            --name ${{ env.NGINX }} \
-            nginx:alpine
+          --restart unless-stopped \
+          --network ${{ env.NETWORK }} \
+          -p 8080:80 \
+          -v $PWD/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro \
+          --name ${{ env.NGINX }} \
+          nginx:alpine
 
       - name: Remove old application container
         shell: bash
