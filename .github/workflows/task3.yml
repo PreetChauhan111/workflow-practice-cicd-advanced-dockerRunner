@@ -1,14 +1,14 @@
-name: Task 2
+name: Task 3
 
 on:
   push:
-    branches:
-      - develop
+    tags:
+      - v*
     paths:
-      - task2/**
+      - task3/**
 
 env:
-  NAME: "task2-website"
+  NAME: "task3-website"
 
 jobs:
   build:
@@ -19,7 +19,7 @@ jobs:
       - name: remove old container
         run: docker rm -f ${{ env.NAME }} || true
       - name: build image
-        run: docker build -t ${{ env.NAME }}:1.0 task2
+        run: docker build -t ${{ env.NAME }}:1.0 task3
       - name: Run new container
         run: |
           docker run -d \
