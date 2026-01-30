@@ -16,6 +16,7 @@ jobs:
     steps:
       - name: Code Checkout
         uses: actions/checkout@v4
+
       - name: Determine Color
         run: |
           if docker ps --format '{{.Names}}' | grep -q "${{ env.NAME }}-blue"
@@ -28,8 +29,10 @@ jobs:
             echo "OLD_COLOR=green" >> $GITHUB_ENV
             echo "PORT=8080" >> $GITHUB_ENV
           fi
+
       - name: build image
         run: docker build -t ${{ env.NAME }}-website:latest ${{ env.NAME }}
+
       - name: New Container Blue
         if: ${{ env.COLOR == 'blue' }}
         run: |
@@ -38,6 +41,7 @@ jobs:
           -p 8080:80 \
           --name ${{ env.NAME }}-${{ env.COLOR }} \
           ${{ env.NAME }}-website:latest
+
       - name: New Container Green
         if: ${{ env.COLOR == 'green' }}
         run: |
@@ -46,8 +50,10 @@ jobs:
           -p 8081:80 \
           --name ${{ env.NAME }}-${{ env.COLOR }} \
           ${{ env.NAME }}-website:latest
+
       - name: Container Health Check
         run: |
+          echo "HEALTHY=false" >> $GITHUB_ENV
           for i in {1..10}
           do
             if curl -sf http://localhost:${{ env.PORT }} 
@@ -57,11 +63,13 @@ jobs:
             fi
             sleep 2
           done
+
       - name: Rollback if Unhealthy
         if: ${{ env.HEALTHY == 'false' }}
         run: |
           docker rm -f ${{ env.NAME }}-${{ env.COLOR }} || true
       - name: Remove Old Container
+      
         if: ${{ env.HEALTHY == 'true' }}
         run: |
           docker rm -f ${{ env.NAME }}-${{ env.OLD_COLOR }} || true
