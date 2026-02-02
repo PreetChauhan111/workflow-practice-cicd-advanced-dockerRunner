@@ -86,7 +86,7 @@ jobs:
               --name ${{ env.NGINX }} \
               --network ${{ env.NETWORK }} \
               -p 8080:80 \
-              -v $PWD/task6/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro \
+              -v $GITHUB_WORKSPACE/task6/nginx:/etc/nginx/conf.d:ro \
               nginx:alpine
           fi
 
